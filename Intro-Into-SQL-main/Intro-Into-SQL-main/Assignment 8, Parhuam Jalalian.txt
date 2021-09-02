@@ -1,0 +1,87 @@
+--Oracle SQL
+--Lab Assignment #8 
+--Parhuam Jalalian
+--Student ID #: 8839
+--Due date:  6/20/21 11:59pm
+--Date Handed in: 6/18/21 3:50 pm
+
+
+--Write DML Statements to simulate the following Business Processes:
+--1. Setup a department, course within a department with 2 sections. Section must have a location assigned. Produce a report showing the department, its course and sections (with complete section information).
+
+INSERT INTO College VALUES (1234, 'De Anza College', '21250 Stevens Creek Blvd', '4088645300');
+INSERT INTO Location VALUES (11111, 'Cupertino, CA');
+INSERT INTO Department VALUES (6666, 'Computer Information Systems', 11111, 1234);
+INSERT INTO Course VALUES (8888, 1, 'Intro to SQL', NULL, 6666);
+INSERT INTO Resident VALUES (0001, 'Cherry Hotel', 4444, 'Y');
+INSERT INTO Student VALUES (
+  200000000,
+  'Green', 'Luke',
+  '4444 Apple Avenue',
+  'fakemail@gmail.com',
+  '111 111 1111',
+  1,
+  0001
+);
+INSERT INTO Payment VALUES (6789, 'CIS64B');
+INSERT INTO StudentRegistration VALUES (
+  1,
+  'N',
+  200000000,
+  1235, 
+  6789
+);
+INSERT INTO Section VALUES (
+  1234, 1, 8888, 11111,
+  2345, 5000, '28-APR-2021', '25-JUN-2021',
+   200000000
+);
+INSERT INTO Section VALUES (
+  1235, 1, 8888, 22222,
+  2444, 6000, '28-APR-2021', '25-JUN-2021',
+   200000000
+);
+
+
+column name format a40;
+column course_name format a20;
+set linesize 600;
+SELECT d.name, c.course_name, s.id, s.section_id, s.course_id, s.location_id, s.start_time, s.end_time, s.start_date, s.end_date, s.user_id
+FROM Department d, Course c, Section s
+WHERE d.ID = c.department_ID AND c.ID = s.course_ID;
+
+
+
+NAME                                     COURSE_NAME                  ID SECTION_ID  COURSE_ID LOCATION_ID START_TIME  END_TIME START_DAT END_DATE    USER_ID
+---------------------------------------- -------------------- ---------- ---------- ---------- ----------- ---------- ---------- --------- --------- ----------
+Computer Information Systems             Intro to SQL               1234          1       8888       11111       2345      5000 28-APR-21 25-JUN-21  200000000
+Computer Information Systems             Intro to SQL               1235          1       8888       22222       2444      6000 28-APR-21 25-JUN-21  200000000
+
+
+
+
+
+--2. Now register a student to a section and process student payment. Produce a report showing student registration information, including payment information.
+
+column first_name format a40;
+column last_name format a20;
+set linesize 600;
+SELECT s.ID,s.first_name, s.last_name, 
+sr.id, sr.student_id, sr.section_id, sr.payment_id, 
+p.id, p.paymentname
+FROM Student s, StudentRegistration sr, Payment p
+WHERE s.ID = sr.student_ID AND (p.ID = sr.payment_ID);
+
+
+
+        ID FIRST_NAME                               LAST_NAME                    ID STUDENT_ID SECTION_ID PAYMENT_ID        ID PAYMENTNAME
+---------- ---------------------------------------- -------------------- ---------- ---------- ---------- ---------- ---------- --------------------------------------------------
+ 200000000 Green                                    Luke                          1  200000000       1235       6789      6789 CIS64B
+
+
+--3. How can you improve your DB Schema further. Make four recommendations.
+1. Normalize my student table by further spliting its columns over two tables(student header, student detail).
+2. Normalize my section table by further spliting its columns over two tables(section header, section detail).
+3. Reduce overhead by further removing aditional dependencies that are not being addressed. 
+4. Double check my constraint sizes and not run into those errors again. 
+
