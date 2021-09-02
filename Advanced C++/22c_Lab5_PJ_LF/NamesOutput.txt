@@ -1,0 +1,17 @@
+pre-order
+name		date
+Brad Rogers	1995-04-04
+Alex Hamilton	1990-03-03
+Jon Smith	1990-01-01
+Ted Cruz	1990-02-02
+Stef Currey	1992-04-12
+Terry Holmes	1991-02-02
+
+post-order
+name		date
+Alex Hamilton	1990-03-03
+Jon Smith	1990-01-01
+Ted Cruz	1990-02-02
+Stef Currey	1992-04-12
+Terry Holmes	1991-02-02
+Brad Rogers	1995-04-04
