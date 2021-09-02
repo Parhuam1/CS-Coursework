@@ -1,7 +1,6 @@
 --Oracle SQL
 --Lab Assignment #3 
 --Parhuam Jalalian
---Student ID #: 8839
 --Due date: 5/4/21
 --Date Handed in: 5/2/2021 
 
