@@ -1,0 +1,131 @@
+--Oracle SQL
+--Lab Assignment #7 
+--Parhuam Jalalian
+--Student ID #: 8839
+--Due date:  6/13/21 11:59pm
+--Date Handed in: 6/11/21 2:42 pm
+
+-- Q1. Create Table and Tablespaces  Q1. Based on the schema in Assignment 6, create tables with  constraints. Consider using the following constraints as appropriate Primary Key, Foreign key, Unique, Null or Check. 
+
+-- User is changed to Student
+
+DROP TABLE StudentRegistration CASCADE CONSTRAINTS;
+DROP TABLE Section CASCADE CONSTRAINTS;
+DROP TABLE Course CASCADE CONSTRAINTS;
+DROP TABLE Department CASCADE CONSTRAINTS;
+DROP TABLE Student CASCADE CONSTRAINTS;
+DROP TABLE Resident CASCADE CONSTRAINTS;
+DROP TABLE Location;
+DROP TABLE College;
+DROP TABLE Payment;
+
+
+CREATE TABLE Payment (
+ID NUMBER(4) NOT NULL,
+PaymentName VARCHAR(50),
+CONSTRAINT Payment_ID_pk PRIMARY KEY(ID));
+
+CREATE TABLE Location (
+ID NUMBER(5) NOT NULL,
+Location_Name VARCHAR(50),
+CONSTRAINT Location_ID_pk PRIMARY KEY(ID));
+
+CREATE TABLE College (
+ID NUMBER(4) NOT NULL,
+name VARCHAR(50),
+address VARCHAR(50),
+tel_no VARCHAR(25),
+CONSTRAINT College_name_uk UNIQUE (name),
+CONSTRAINT College_ID_pk PRIMARY KEY(ID));
+
+CREATE TABLE Resident (
+ID NUMBER(10) NOT NULL,
+ResiName VARCHAR(50),
+FeeSchedule_ID NUMBER(4) NOT NULL,
+Residency VARCHAR(1) CHECK (Residency IN ('Y', 'N')),
+CONSTRAINT Resident_ID_pk PRIMARY KEY(ID));
+
+
+CREATE TABLE Student (
+  ID NUMBER(10) NOT NULL CHECK (ID >= 100000000),
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  address VARCHAR(75),
+  email VARCHAR(50),
+  tel_no VARCHAR(20),
+  type NUMBER(2),
+  Resident_ID NUMBER(4) NOT NULL,
+  CONSTRAINT User_ID_pk PRIMARY KEY(ID),
+  CONSTRAINT User_Resident_fk FOREIGN KEY(Resident_ID) REFERENCES Resident(ID)
+)
+PARTITION BY RANGE (ID) (
+  PARTITION User_ID_r1 VALUES LESS THAN (200000000),
+  PARTITION User_ID_r2 VALUES LESS THAN (300000000),
+  PARTITION User_ID_r3 VALUES LESS THAN (400000000),
+  PARTITION User_ID_r4 VALUES LESS THAN (500000000),
+  PARTITION User_ID_r5 VALUES LESS THAN (600000000),
+  PARTITION User_ID_r6 VALUES LESS THAN (700000000),
+  PARTITION User_ID_r7 VALUES LESS THAN (800000000),
+  PARTITION User_ID_r8 VALUES LESS THAN (900000000),
+  PARTITION User_ID_r9 VALUES LESS THAN (MAXVALUE)
+);
+
+CREATE TABLE Department (
+ID NUMBER(4) NOT NULL,
+name VARCHAR(50),
+Loc_ID NUMBER(5) NOT NULL,
+College_ID NUMBER(4) NOT NULL,
+CONSTRAINT Department_ID_pk PRIMARY KEY(ID),
+CONSTRAINT Department_Location_fk FOREIGN KEY(Loc_ID) REFERENCES Location(ID),
+CONSTRAINT Department_College_fk FOREIGN KEY(College_ID) REFERENCES College(ID));
+
+CREATE TABLE Course (
+ID NUMBER(4) NOT NULL,
+course_no NUMBER(2),
+course_name VARCHAR(50),
+prereq_ID NUMBER(4) CONSTRAINT Course_prereq_sk REFERENCES Course(ID),
+Department_ID NUMBER(4) NOT NULL,
+CONSTRAINT Course_ID_pk PRIMARY KEY(ID),
+CONSTRAINT Course_Department_fk FOREIGN KEY(Department_ID) REFERENCES Department(ID));
+
+
+CREATE TABLE StudentRegistration (
+  ID NUMBER(10) NOT NULL,
+  fee_status VARCHAR(1) CHECK (fee_status IN ('Y', 'N')),
+  Student_ID NUMBER(10) NOT NULL,
+  Section_ID NUMBER(4) NOT NULL,
+  Payment_ID NUMBER(4) NOT NULL,
+  CONSTRAINT StudentRegistration_ID_pk PRIMARY KEY(ID),
+  CONSTRAINT StudentRegistration_Student_fk FOREIGN KEY(Student_ID) REFERENCES Student(ID),
+  CONSTRAINT StudentRegistration_Payment_fk FOREIGN KEY(Payment_ID) REFERENCES Payment(ID)
+)
+PARTITION BY HASH (ID)
+PARTITIONS 10;
+
+CREATE TABLE Section (
+ID NUMBER(4) NOT NULL,
+section_ID NUMBER(2),
+Course_ID NUMBER(4) NOT NULL,
+Location_ID NUMBER(5) NOT NULL,
+start_time NUMBER(4),
+end_time NUMBER(4),
+start_date DATE,
+end_date DATE,
+User_ID NUMBER(10) NOT NULL,
+CONSTRAINT Section_ID_pk PRIMARY KEY(ID),
+CONSTRAINT Section_Course_fk FOREIGN KEY(Course_ID) REFERENCES Course(ID),
+CONSTRAINT Section_StudentRegistration_fk FOREIGN KEY(Section_ID) REFERENCES StudentRegistration(ID),
+CONSTRAINT Section_Student_fk FOREIGN KEY(User_ID) REFERENCES Student(ID));
+
+
+--Q2. Project which tables will increase quickly and implement partitioning types in at least 2 tables in your schema. Explain why these partitioning types would be useful in the context of your implementation. 
+
+--1. Used partition by hash for Student registration because Student can be charged(the fee) with multiple courses. 
+
+--2. I created student table as an example I used cabinent/shelf as terminology where as any employee id within certain range can be stored in different shelfs. This will help with data organization as well as fast or quick system response to search and retrieval.
+
+
+
+
+
+

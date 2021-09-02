@@ -1,0 +1,159 @@
+--Oracle SQL
+--Lab Assignment #4 
+--Parhuam Jalalian
+--Student ID #: 8839
+--Due date: 5/14/21 11:59 p.m.
+--Date Handed in: 5/14/21 1:05 p.m.
+
+--#1. Display the manager number and the salary of the lowest paid employee for that manager. Exclude anyone whose manager is not known. Exclude any groups where the minimum salary is less than $1000. Sort the output in descending order of salary.
+--write a query to get mgr and empno(for each mgr)
+--who work for which manager - self-equi join using mgr and empno Group by Manager Number
+--to find the minimum salary
+-- Exclusion in group by clause - min salary > 1000
+-- Order by clause - desc used with group Function. If there is any null data then use NVL function. 
+
+SQL> SELECT DISTINCT e.mgr AS "Manager Number",
+  2  MIN(e1.sal) AS "Lowest Salary"
+  3  FROM emp e INNER JOIN emp e1
+  4  ON (e.mgr = e1.mgr AND e.empno = e1.empno)
+  5  AND e.mgr IS NOT NULL
+  6  GROUP BY e.mgr
+  7  HAVING MIN(e1.sal) > 1000
+  8  ORDER BY MIN(e1.sal) DESC;
+
+Manager Number Lowest Salary
+-------------- -------------
+          7566          3000
+          7839          2450
+          7782          1300
+          7788          1100
+
+
+--#2. Write a query to display the department name, location name, number of employees, and the average salary for all employees in that department. Label the columns dname, loc, Number of People, and Salary, respectively.
+-- Label the columns dename, loc, Number of People, and Salary, respectively. 
+-- join between department and emp
+-- group by deptno - for $ of employees (count) and avg(sal)
+
+SQL> SELECT d.dname AS "dname",
+  2  d.loc AS "loc",
+  3  COUNT(e.deptno) AS "Number of People",
+  4  TRUNC(AVG(e.sal), 2) AS "Salary"
+  5  FROM dept d INNER JOIN emp e
+  6  ON (d.deptno = e.deptno)
+  7  GROUP BY d.deptno, d.loc, d.dname;
+
+dname          loc           Number of People     Salary
+-------------- ------------- ---------------- ----------
+ACCOUNTING     NEW YORK                     3    2916.66
+SALES          CHICAGO                      6    1566.66
+RESEARCH       DALLAS                       5       2175
+
+--#3. Write a query to display department names with salary grade, minimum salary and average commission. For departments with null commission, you should display 0. (salgrade table can be used for getting salary grade).
+-- join between emp, salgrade, dept
+-- group by depno - min(sal) and avg(comm - factory in NVL function)
+
+SQL> SELECT d.dname AS "Dname",
+  2  s.grade AS "Grade",
+  3  e.sal AS "Min Salary",
+  4  TRUNC(AVG(NVL(e2.comm, 0)), 2) AS "Average Commission"
+  5  FROM salgrade s
+  6  INNER JOIN emp e
+  7  ON (e.sal BETWEEN s.losal AND s.hisal)
+  8  INNER JOIN dept d
+  9  ON (d.deptno = e.deptno)
+ 10  INNER JOIN emp e2
+ 11  ON (d.deptno = e2.deptno)
+ 12  WHERE e.sal = (SELECT MIN(e1.sal)
+ 13  FROM emp e1
+ 14  WHERE e1.deptno = e.deptno)
+ 15  GROUP BY d.deptno, d.dname, s.grade, e.sal;
+
+Dname               Grade Min Salary Average Commission
+-------------- ---------- ---------- ------------------
+SALES                   1        950             366.66
+RESEARCH                1        800                  0
+ACCOUNTING              2       1300                  0
+
+
+--#4. What is difference between COUNT(*), COUNT(col_name), COUNT(DISTINCT(col_name)), COUNT(ALL(col_name))? Explain with examples.
+
+-- COUNT(*) functions count the total rows in the table, including NULL values.
+-- COUNT(col_name) counts all rows in the specificed column while exluding NULL values. 
+-- COUNT(DISTINCT(col_name)) will only count distinct (duplicate values are eliminated).
+-- COUNT(ALL(col_name)) is the same definition as COUNT(col_name)
+
+SQL> SELECT empno, comm FROM emp;
+
+     EMPNO       COMM
+---------- ----------
+      7839
+      7698
+      7782
+      7566
+      7654       1400
+      7499        300
+      7844          0
+      7900
+      7521        500
+      7902
+      7369
+
+     EMPNO       COMM
+---------- ----------
+      7788
+      7876
+      7934
+
+SQL> SELECT COUNT(COMM) FROM emp;
+
+COUNT(COMM)
+-----------
+          4
+
+SQL> SELECT COUNT(ALL COMM) FROM emp;
+
+COUNT(ALLCOMM)
+--------------
+             4
+
+SQL> SELECT COUNT(*) FROM emp;
+
+  COUNT(*)
+----------
+        14
+
+SQL> SELECT COUNT(DISTINCT COMM) FROM emp;
+
+COUNT(DISTINCTCOMM)
+-------------------
+                  4
+
+
+--#5. Display the employee number, name, salary, and salary increase by 15% expressed as a whole number. Label the column New Salary.
+SQL> SELECT empno AS "employee number",
+  2  ename AS "name",
+  3  sal AS "salary",
+  4  TRUNC(sal+sal*0.15) AS "New Salary"
+  5  FROM emp;
+
+employee number name           salary New Salary
+--------------- ---------- ---------- ----------
+           7839 KING             5000       5750
+           7698 BLAKE            2850       3277
+           7782 CLARK            2450       2817
+           7566 JONES            2975       3421
+           7654 MARTIN           1250       1437
+           7499 ALLEN            1600       1840
+           7844 TURNER           1500       1725
+           7900 JAMES             950       1092
+           7521 WARD             1250       1437
+           7902 FORD             3000       3450
+           7369 SMITH             800        920
+
+employee number name           salary New Salary
+--------------- ---------- ---------- ----------
+           7788 SCOTT            3000       3450
+           7876 ADAMS            1100       1265
+           7934 MILLER           1300       1495
+
+14 rows selected.
